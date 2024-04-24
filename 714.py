@@ -6,11 +6,11 @@ doc = Document('template.docx')
 
 def search_redact_paragraph(index):
     paragraph = doc.paragraphs[index]
+    print([run.text for run in paragraph.runs])
     for run in paragraph.runs:
         run_text = run.text.strip()
         if run_text.startswith('<') and run_text.endswith('>'):
-            return True
-    return False
+            indexes.append(index)
 
 def redact_paragraph(index, line):
     # Получаем первый параграф
@@ -51,6 +51,7 @@ def redact_paragraph(index, line):
             new_run.bold = True
             new_run.font.size = Pt(15)
 
+
     # Вставляем новый параграф перед текущим
     index = list(doc.element.body).index(paragraph._element)
     doc.element.body.insert(index, new_paragraph._element)
@@ -59,11 +60,46 @@ def redact_paragraph(index, line):
     doc.element.body.remove(paragraph._element)
 
 indexes = []
-lines = ["АЗЕРБАЙДЖАНСКАЯ РЕСПУБЛИКА ИРАН", "Иванова", "Глиссандра", "Рюриковна"]
+index = 0
+answer = None
+fields = [
+    'Номер паспорта',
+    'Фамилия',
+    'Имя',
+    'Имя отца',
+    'Дата рождения',
+    'Место рождения',
+    'Пол',
+    'Дата выдачи',
+    'Действителен до',
+    'Длинный номер',
+]
+lines = []
+for field in fields:
+    answer = input(f'{field}: ')
+    if field in ('Дата рождения', 'Дата выдачи', 'Действителен до'):
+        day, month, year = answer[:2], answer[2:4], answer[4:]
+        answer = f'{day}/{month}/{year}'
+    if field not in ('Пол', 'Место рождения'):
+        answer = answer.upper()
+    lines.append(answer)
+
+print('----------------', lines)
+
+#lines = ["АЗЕРБАЙДЖАНСКАЯ РЕСПУБЛИКА ИРАН", "Иванова", "Глиссандра", "Рюриковна"]
+for index in range(len(doc.paragraphs)):
+    search_redact_paragraph(index)
+
+print('------------', indexes)
+for index, line in zip(indexes, lines):
+    redact_paragraph(index, line)
+
+print(list(zip(indexes, lines)))
+# Сохраняем изменения
+doc.save('test3.docx')
+
+doc = Document('test3.docx')
 for index in range(len(doc.paragraphs)):
     if search_redact_paragraph(index):
         indexes.append(index)
-for index, line in zip(indexes, lines):
-    redact_paragraph(index, line)
-# Сохраняем изменения
-doc.save('test2.docx')
+
