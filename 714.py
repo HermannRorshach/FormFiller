@@ -14,6 +14,7 @@ def search_redact_paragraph(index):
 
 def redact_paragraph(index, line):
     # Получаем первый параграф
+    flag = False
     paragraph = doc.paragraphs[index]
     p_style = paragraph.style
     line_spacing = paragraph.paragraph_format.line_spacing
@@ -30,7 +31,7 @@ def redact_paragraph(index, line):
     # Проходимся по всем Run в текущем параграфе
     for run in paragraph.runs:
         run_text = run.text.strip()
-        if not run_text.startswith('<') and not run_text.endswith('>'):
+        if (not run_text.startswith('<') and not run_text.endswith('>')) or flag:
             # Копируем Run в новый параграф
             new_run = new_paragraph.add_run(run.text)
             # Копируем форматирование
@@ -40,6 +41,7 @@ def redact_paragraph(index, line):
             new_run.font.size = run.font.size
         else:
             #print('Мы нашли искомый ран!')
+            flag = True
             print(run.text)
             new_run = new_paragraph.add_run()
             # Копируем форматирование
