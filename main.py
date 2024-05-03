@@ -1,6 +1,25 @@
 from docx import Document
 from docx.shared import Pt
 
+
+indexes = []
+index = 0
+answer = None
+fields = [
+    'Номер паспорта',
+    'Фамилия',
+    'Имя',
+    'Имя отца',
+    'Дата рождения',
+    'Место рождения',
+    'Тест',
+    'Пол',
+    'Дата выдачи',
+    'Действителен до',
+    'Длинный номер',
+]
+lines = []
+
 # Открываем документ
 doc = Document('template.docx')
 
@@ -13,10 +32,20 @@ def search_redact_paragraph(index):
         if run_text.startswith('<') and run_text.endswith('>'):
             indexes.append(index)
 
+def apply_run_formatting(new_run, run):
+    new_run.bold = run.bold
+    new_run.italic = run.italic
+    new_run.underline = run.underline
+    new_run.font.size = run.font.size
+    color = run.font.color.rgb
+    if color is not None:
+        new_run.font.color.rgb = color
+    new_run.font.strike = run.font.strike
+    return new_run
 
 def redact_paragraph(index, line):
     # Получаем параграф
-    flag = False
+    flag = False # Показывает, изменялся ли уже текст в этом параграфе
     paragraph = doc.paragraphs[index]
     p_style = paragraph.style
     line_spacing = paragraph.paragraph_format.line_spacing
@@ -33,34 +62,21 @@ def redact_paragraph(index, line):
         if (
             not run_text.startswith('<') and not run_text.endswith('>')
         ) or flag:
+            # Если Run не содержит знаков < и > или flag == True,
+            # то копируем текст Run без изменений, сохраняя оформление
             # Копируем Run в новый параграф
             new_run = new_paragraph.add_run(run.text)
             # Копируем форматирование
-            new_run.bold = run.bold
-            new_run.italic = run.italic
-            new_run.underline = run.underline
-            new_run.font.size = run.font.size
+            new_run = apply_run_formatting(new_run, run)
             # print(new_run.font.size)
         else:
+            # ситуация, когда в Run есть знаки < и >
             flag = True
             print(run.text)
-            new_run = new_paragraph.add_run()
+            # new_run = new_paragraph.add_run()
             new_run = new_paragraph.add_run(line)
             # Копируем форматирование
-            new_run.italic = run.italic
-            new_run.underline = run.underline
-            new_run.font.size = run.font.size
-            # копируем цвет текста
-            color = run.font.color.rgb
-            if color is not None:
-                # устанавливаем цвет текста
-                new_run.font.color.rgb = color
-            new_run.bold = run.bold
-            # проверяем зачёркивание рана
-            strike = run.font.strike
-            # Устанавливаем значение зачеркивания для нового Run такое же,
-            # как у текущего Run
-            new_run.font.strike = strike
+            new_run = apply_run_formatting(new_run, run)
             if run.text[1:-1]:
                 try:
                     f_s, new_run.bold = [
@@ -83,22 +99,7 @@ def redact_paragraph(index, line):
     doc.element.body.remove(paragraph._element)
 
 
-indexes = []
-index = 0
-answer = None
-fields = [
-    'Номер паспорта',
-    'Фамилия',
-    'Имя',
-    'Имя отца',
-    'Дата рождения',
-    'Место рождения',
-    'Пол',
-    'Дата выдачи',
-    'Действителен до',
-    'Длинный номер',
-]
-lines = []
+
 for field in fields:
     answer = input(f'{field}: ')
     if field in ('Дата рождения', 'Дата выдачи', 'Действителен до'):
@@ -119,9 +120,10 @@ for index, line in zip(indexes, lines):
 
 print(list(zip(indexes, lines)))
 # Сохраняем изменения
-doc.save('test3.docx')
+doc.save('test4.docx')
 
-doc = Document('test3.docx')
+
+doc = Document('test4.docx')
 for index in range(len(doc.paragraphs)):
     if search_redact_paragraph(index):
         indexes.append(index)
