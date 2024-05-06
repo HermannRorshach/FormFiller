@@ -1,7 +1,6 @@
 from docx import Document
 from docx.shared import Pt
 
-
 indexes = []
 index = 0
 answer = None
@@ -32,6 +31,7 @@ def search_redact_paragraph(index):
         if run_text.startswith('<') and run_text.endswith('>'):
             indexes.append(index)
 
+
 def apply_run_formatting(new_run, run):
     new_run.bold = run.bold
     new_run.italic = run.italic
@@ -43,9 +43,10 @@ def apply_run_formatting(new_run, run):
     new_run.font.strike = run.font.strike
     return new_run
 
+
 def redact_paragraph(index, line):
     # Получаем параграф
-    flag = False # Показывает, изменялся ли уже текст в этом параграфе
+    flag = False  # Показывает, изменялся ли уже текст в этом параграфе
     paragraph = doc.paragraphs[index]
     p_style = paragraph.style
     line_spacing = paragraph.paragraph_format.line_spacing
@@ -87,7 +88,7 @@ def redact_paragraph(index, line):
                     array = [
                         int(number) for number in run.text[1:-1].replace(
                             ' ', ''
-                            ).split(',')]
+                        ).split(',')]
                     if len(array) != 2:
                         print(f'Ран {run.text} должен содержать '
                               f'два целых числа, разделённых запятой')
@@ -97,7 +98,6 @@ def redact_paragraph(index, line):
 
     # Удаляем исходный параграф
     doc.element.body.remove(paragraph._element)
-
 
 
 for field in fields:

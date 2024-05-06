@@ -1,0 +1,15 @@
+{% extends "filler/base.html" %}
+
+{% block title %}Иранский паспорт{% endblock title %}
+   
+{% block content %}
+
+<h2>Иранский паспорт</h2>
+<form method="post">
+    {% csrf_token %}
+    <div class="form-style">
+    {{ form.as_p }}
+    </div>
+    <br><button>Отправить</button>
+</form>
+{% endblock content %}
