@@ -11,10 +11,10 @@ class IranPassport(models.Model):
     place_of_birthday = models.CharField(
         max_length=30, verbose_name='Место рождения')
     sex = models.CharField(max_length=30, verbose_name='Пол')
-    date_of_issue = models.CharField(max_length=30, verbose_name='Дата выдачи')      
+    date_of_issue = models.CharField(max_length=30, verbose_name='Дата выдачи')
     date_of_expiry = models.CharField(
         max_length=30, verbose_name='Действителен до')
-    lond_number = models.CharField(max_length=30, verbose_name='Длинный номер')      
+    lond_number = models.CharField(max_length=30, verbose_name='Длинный номер')
 
     def __str__(self):
         return f"Иран пасп. {self.surname} {self.name}"

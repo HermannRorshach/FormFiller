@@ -1,7 +1,9 @@
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
 from .forms import IranPassportForm
+from .main import main
 
 
 def index(request):
@@ -12,13 +14,13 @@ class IranPassportCreateView(CreateView):
     form_class = IranPassportForm
     template_name = 'filler/IranPassport.html'
     success_url = reverse_lazy('filler')
-    
+
     def get_context_data(self, **kwargs):
         print('Мы в гет контект')
         context = super().get_context_data(**kwargs)
         print('context =', context)
         return context
-    
+
     def form_valid(self, form):
         cleaned_data = form.cleaned_data
 
@@ -34,3 +36,5 @@ class IranPassportCreateView(CreateView):
         print("Дата выдачи:", cleaned_data['date_of_issue'])
         print("Действителен до:", cleaned_data['date_of_expiry'])
         print("Длинный номер:", cleaned_data['lond_number'])
+        main(cleaned_data)
+        return HttpResponse("Данные успешно обработаны")
