@@ -91,13 +91,19 @@ def main(cleaned_data):
     index = 0
     answer = None
     lines = []
+    print('Мы в функции main файла main.py')
     for field_name, data in cleaned_data.items():
         answer = data
-        if field_name in ('Дата рождения', 'Дата выдачи', 'Действителен до'):
+        if field_name in ('birthday', 'date_of_issue', 'date_of_expiry'):
             day, month, year = answer[:2], answer[2:4], answer[4:]
             answer = f'{day}/{month}/{year}'
-        if field_name not in ('Пол', 'Место рождения'):
+        if field_name not in ('place_of_birthday', 'sex'):
             answer = answer.upper()
+        if field_name == 'place_of_birthday':
+            answer = answer.capitalize()
+        if field_name == 'sex':
+            answer = {'M': 'мужской', 'F': 'женский'}[answer]
+
         lines.append(answer)
 
     print('----------------', lines)

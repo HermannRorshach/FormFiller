@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
@@ -7,7 +8,7 @@ from .main import main
 
 
 def index(request):
-    pass
+    return redirect('filler')
 
 
 class IranPassportCreateView(CreateView):
@@ -32,7 +33,7 @@ class IranPassportCreateView(CreateView):
         print("Имя отца:", cleaned_data['father_name'])
         print("Дата рождения:", cleaned_data['birthday'])
         print("Место рождения:", cleaned_data['place_of_birthday'])
-        print("Пол:", cleaned_data['sex'])
+        print("Пол:", {'M':'мужской', 'F': 'женский'}[cleaned_data['sex']])
         print("Дата выдачи:", cleaned_data['date_of_issue'])
         print("Действителен до:", cleaned_data['date_of_expiry'])
         print("Длинный номер:", cleaned_data['lond_number'])
