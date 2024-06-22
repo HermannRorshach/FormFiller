@@ -1,12 +1,52 @@
 import os
 
 from docx import Document
-from docx.shared import Pt
+from docx.shared import Inches, Pt
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
+
+
+def add_run_to_paragraph(run, new_paragraph, part):
+    # new_run = new_paragraph.add_run()
+    new_run = new_paragraph.add_run(part)
+    # Копируем форматирование
+    new_run = apply_run_formatting(new_run, run)
+    if run.text[1:-1]:
+        try:
+            f_s, new_run.bold = [
+                int(number) for number in run.text[1:-1].replace(
+                    ' ', '').split(',')]
+            new_run.font.size = Pt(f_s)
+        except ValueError:
+            array = [
+                int(number) for number in run.text[1:-1].replace(
+                    ' ', ''
+                ).split(',')]
+            if len(array) != 2:
+                print(f'Ран {run.text} должен содержать '
+                        f'два целых числа, разделённых запятой')
+    return new_run
+
+
+def add_image_to_paragraph(paragraph, image_path):
+    """
+    Добавляет изображение в указанный параграф.
+
+    :param paragraph: Параграф, в который нужно добавить изображение.
+    :param image_path: Путь к изображению.
+    """
+    run = paragraph.add_run()
+
+    # Добавляем изображение в параграф
+    run.add_picture(image_path, width=Inches(6))  # Ширина изображения 6 дюймов
+
+    return run
+
 
 
 def search_redact_paragraph(doc, indexes, index):
     paragraph = doc.paragraphs[index]
-    print([run.text for run in paragraph.runs])
+    print(paragraph.text)
     for run in paragraph.runs:
         run_text = run.text.strip()
         if run_text.startswith('<') and run_text.endswith('>'):
@@ -25,7 +65,7 @@ def apply_run_formatting(new_run, run):
     return new_run
 
 
-def redact_paragraph(doc, index, line):
+def redact_paragraph(doc, index, line, cleaned_data):
     # Получаем параграф
     flag = False  # Показывает, изменялся ли уже текст в этом параграфе
     paragraph = doc.paragraphs[index]
@@ -55,24 +95,16 @@ def redact_paragraph(doc, index, line):
             # ситуация, когда в Run есть знаки < и >
             flag = True
             print(run.text)
-            # new_run = new_paragraph.add_run()
-            new_run = new_paragraph.add_run(line)
-            # Копируем форматирование
-            new_run = apply_run_formatting(new_run, run)
-            if run.text[1:-1]:
-                try:
-                    f_s, new_run.bold = [
-                        int(number) for number in run.text[1:-1].replace(
-                            ' ', '').split(',')]
-                    new_run.font.size = Pt(f_s)
-                except ValueError:
-                    array = [
-                        int(number) for number in run.text[1:-1].replace(
-                            ' ', ''
-                        ).split(',')]
-                    if len(array) != 2:
-                        print(f'Ран {run.text} должен содержать '
-                              f'два целых числа, разделённых запятой')
+            if run.text[1:-1] == 'image':
+                if cleaned_data['image'] is not None:
+                    add_image_to_paragraph(new_paragraph, cleaned_data['image'])  # cleaned_data['image'] - объект изображения, загруженный через форму
+            else:
+                lines = line.split('\n')
+                if len(lines) > 1:
+                    for i in range(len(lines) - 1): # Обрабатываем вариант, когда значение многострочное
+                        new_run = add_run_to_paragraph(run, new_paragraph, lines[i])
+                        new_run.add_break()
+                new_run = add_run_to_paragraph(run, new_paragraph, lines[-1])
 
     # Вставляем новый параграф перед текущим
     doc.element.body.insert(index, new_paragraph._element)
@@ -81,7 +113,7 @@ def redact_paragraph(doc, index, line):
     doc.element.body.remove(paragraph._element)
 
 
-def main(cleaned_data):
+def main(cleaned_data, image_path=None):
     # Определите путь к файлу template.docx относительно текущего файла main.py
     current_dir = os.path.dirname(__file__)
     template_path = os.path.join(current_dir, 'template.docx')
@@ -92,17 +124,28 @@ def main(cleaned_data):
     answer = None
     lines = []
     print('Мы в функции main файла main.py')
-    for field_name, data in cleaned_data.items():
+    file_name = cleaned_data.pop('file_name')
+    print('file_name =', file_name)
+    if 'image' in cleaned_data:
+        clean_d = [('image', cleaned_data['image'])] + list(cleaned_data.items())[:-1]
+        print('\n------\n\n', clean_d, '\n--------\n')
+    for field_name, data in clean_d:
         answer = data
         if field_name in ('birthday', 'date_of_issue', 'date_of_expiry'):
             day, month, year = answer[:2], answer[2:4], answer[4:]
             answer = f'{day}/{month}/{year}'
-        if field_name not in ('place_of_birthday', 'sex'):
+        if field_name not in ('place_of_birthday', 'sex', 'image', 'issuing_authority', 'signature'):
             answer = answer.upper()
         if field_name == 'place_of_birthday':
             answer = answer.capitalize()
         if field_name == 'sex':
             answer = {'M': 'мужской', 'F': 'женский'}[answer]
+        if field_name == 'issuing_authority':
+            answer = {"authority1": "Бригадный генерал\nАли Золгадри",
+                      "authority2": "Бригадный генерал\nСадэг Резадуст"}[answer]
+        if field_name == 'signature':
+            answer = {"empty": "-",
+                      "signature": "/подпись/"}[answer]
 
         lines.append(answer)
 
@@ -111,18 +154,18 @@ def main(cleaned_data):
     for index in range(len(doc.paragraphs)):
         search_redact_paragraph(doc, indexes, index)
 
-    print('------------', indexes)
+    print('------------\n', indexes)
     for index, line in zip(indexes, lines):
-        redact_paragraph(doc, index, line)
+        redact_paragraph(doc, index, line, cleaned_data)
 
     print(list(zip(indexes, lines)))
 
     # Определите путь для сохранения файла
-    output_path = os.path.join(current_dir, 'test1.docx')
+    output_path = os.path.join(current_dir, f'{file_name}.docx')
 # Сохраняем изменения
     doc.save(output_path)
 
-    doc.save('test1.docx')
+    doc.save(f'{file_name}.docx')
 
 
 if __name__ == '__main__':

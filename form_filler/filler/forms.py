@@ -10,3 +10,15 @@ class IranPassportForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     instance = self.instance  # текущий экземпляр модели
+
+    #     # Получаем название файла из метода __str__
+    #     file_name = str(instance)
+
+    #     # Добавляем название файла в cleaned_data
+    #     cleaned_data['file_name'] = file_name
+
+    #     return cleaned_data

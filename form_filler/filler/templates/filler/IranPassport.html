@@ -1,11 +1,11 @@
 {% extends "filler/base.html" %}
 
 {% block title %}Иранский паспорт{% endblock title %}
-   
+
 {% block content %}
 
 <h2>Иранский паспорт</h2>
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="form-style">
     {{ form.as_p }}
