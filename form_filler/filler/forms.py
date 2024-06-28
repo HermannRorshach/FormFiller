@@ -7,6 +7,9 @@ class IranPassportForm(forms.ModelForm):
     class Meta:
         model = IranPassport
         fields = '__all__'
+        widgets = {
+            'lond_number': forms.Textarea(attrs={'cols': 60, 'rows': 1}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

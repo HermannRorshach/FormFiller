@@ -170,3 +170,8 @@ def main(cleaned_data, image_path=None):
 
 if __name__ == '__main__':
     main()
+
+
+def custom_filter(some_list):
+    return sum(filter(lambda x: not x % 7, filter(
+        lambda x: isinstance(x, int), some_list))) <= 83
