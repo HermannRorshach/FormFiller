@@ -4,6 +4,8 @@ from docx import Document
 from docx.shared import Inches, Pt
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+from io import BytesIO
+from django.http import FileResponse
 
 
 def add_run_to_paragraph(run, new_paragraph, part):
@@ -160,12 +162,16 @@ def main(cleaned_data, image_path=None):
 
     print(list(zip(indexes, lines)))
 
-    # Определите путь для сохранения файла
-    output_path = os.path.join(current_dir, f'{file_name}.docx')
-# Сохраняем изменения
-    doc.save(output_path)
+#     # Определите путь для сохранения файла
+#     output_path = os.path.join(current_dir, f'{file_name}.docx')
+# # Сохраняем изменения
+#     doc.save(output_path)
 
-    doc.save(f'{file_name}.docx')
+#     doc.save(f'{file_name}.docx')
+    output_stream = BytesIO()
+    doc.save(output_stream)
+    output_stream.seek(0)
+    return output_stream, file_name
 
 
 if __name__ == '__main__':

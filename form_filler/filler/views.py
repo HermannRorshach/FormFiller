@@ -13,6 +13,7 @@ from django.views.generic import CreateView
 from .forms import IranPassportForm
 from .models import IranPassport
 from .main import main
+from django.http import FileResponse
 
 
 def index(request):
@@ -46,6 +47,9 @@ class IranPassportCreateView(CreateView):
     def form_valid(self, form):
         cleaned_data = form.cleaned_data
         image_file = self.request.FILES.get('image')
+        # Создаем экземпляр IranPassport без сохранения в БД
+        iran_passport_instance = IranPassport(**cleaned_data)
+        cleaned_data['file_name'] = str(iran_passport_instance)
         if image_file:
             # Сохраняем загруженный файл во временное местоположение
             temp_image_path = self.save_uploaded_file(image_file)
@@ -68,20 +72,16 @@ class IranPassportCreateView(CreateView):
                 # Иначе сохраняем новый файл
                 image_path = default_storage.save(image_name, ContentFile(open(temp_image_path, 'rb').read()))
 
-            # Создаем экземпляр IranPassport без сохранения в БД
-            iran_passport_instance = IranPassport(**cleaned_data)
-            cleaned_data['file_name'] = str(iran_passport_instance)
-
             # Вызываем функцию main с очищенными данными и путем к изображению
-            main(cleaned_data, image_path=image_path)
+            output_stream, file_name = main(cleaned_data, image_path=image_path)
 
             # Удаляем временный файл
             os.remove(temp_image_path)
         else:
             # Если изображение не загружено, вызываем main только с очищенными данными
-            main(cleaned_data)
+            output_stream, file_name = main(cleaned_data)
 
-        return HttpResponse("Данные успешно обработаны")
+        return FileResponse(output_stream, as_attachment=True, filename=f"{file_name}.docx")
 
     def save_uploaded_file(self, uploaded_file):
         # Сохраняем загруженный файл во временное местоположение на диске и возвращаем его путь
