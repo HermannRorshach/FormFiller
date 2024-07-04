@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+Обработка шаблона
+{% endblock title %}
+
+{% block content %}
+  <h1>Обработка шаблона</h1>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in raw_fields %}
+      <div>
+        {% if field|length > 1 %} {% comment %} Тут надо будет сделать проверку получше {% endcomment %}
+        <p>
+          <label>{{ field }}</label>
+          <input type="text" name="{{ field }}">
+        </p>
+        {% else %}
+        <p>
+        <input type="text" name="empty_field_name_{{ forloop.counter }}" placeholder="Введите название поля">
+        <input type="text" name="empty_field_{{ forloop.counter }}">
+
+        </P>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit">Сохранить</button>
+  </form>
+{% endblock content %}

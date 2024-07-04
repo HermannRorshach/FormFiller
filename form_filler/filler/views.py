@@ -9,12 +9,12 @@ from django.http import FileResponse, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, FormView, TemplateView
 from django.shortcuts import render
 
 from .forms import IranPassportForm
 from .main import main
-from .models import IranPassport
+from .models import IranPassport, Template
 from .template_creator import process_docx
 
 
@@ -30,9 +30,24 @@ class UploadSample(View):
         if 'file' in request.FILES:
             uploaded_file = request.FILES['file']
             fields = process_docx(uploaded_file)  # Передача загруженного файла в функцию
-            print(fields)  # Вывод результата в консоль
-            return HttpResponse('Файл успешно обработан')
+            template = Template.objects.create(
+                author=request.user,
+                name=uploaded_file.name,
+                file_data=uploaded_file.read(),
+                raw_fields=fields
+            )
+            return redirect('filler:process_template', pk=template.id)
         return HttpResponse('Файл не выбран', status=400)
+
+
+
+class ProcessTemplateView(View):
+    def get(self, request, pk):
+        template = Template.objects.get(pk=pk)
+        context = {
+            'raw_fields': template.raw_fields
+        }
+        return render(request, 'filler/process_template.html', context)
 
 
 def index(request):

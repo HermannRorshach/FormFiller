@@ -12,5 +12,6 @@ urlpatterns = [
         views.IranPassportCreateView.as_view(),
         name='filler'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
-    path('upload-sample', views.UploadSample.as_view(), name='upload_sample')
+    path('upload-sample', views.UploadSample.as_view(), name='upload_sample'),
+    path('process-template/<int:pk>/', views.ProcessTemplateView.as_view(), name='process_template'),
 ]
