@@ -5,19 +5,38 @@ import os
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views import View
+from django.views.generic import CreateView, TemplateView
+from django.shortcuts import render
 
 from .forms import IranPassportForm
-from .models import IranPassport
 from .main import main
-from django.http import FileResponse
+from .models import IranPassport
+from .template_creator import process_docx
+
+
+class ProfileView(TemplateView):
+    template_name = 'filler/profile.html'
+
+
+class UploadSample(View):
+    def get(self, request):
+        return render(request, 'filler/upload_sample.html')
+
+    def post(self, request):
+        if 'file' in request.FILES:
+            uploaded_file = request.FILES['file']
+            fields = process_docx(uploaded_file)  # Передача загруженного файла в функцию
+            print(fields)  # Вывод результата в консоль
+            return HttpResponse('Файл успешно обработан')
+        return HttpResponse('Файл не выбран', status=400)
 
 
 def index(request):
-    return redirect('filler')
+    return redirect('filler:filler')
 
 
 def get_file_hash(file_path):

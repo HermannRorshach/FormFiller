@@ -124,8 +124,22 @@ def process_docx(current_dir, file_name):
     return fields
 
 
-# Пример использования
-current_dir = os.path.dirname(__file__)
-  # Укажите путь к вашему шаблону
-fields = process_docx(current_dir, 'raw_template.docx')
-print(fields)
+def process_docx(uploaded_file):
+    # Загружаем документ напрямую из загружаемого файла
+    doc = Document(uploaded_file)
+
+    # Выполняем все необходимые операции с документом
+    merge_similar_runs(doc)
+
+    # Обработка маркеров и получение полей
+    fields = find_and_process_markers(doc)
+
+    # Возвращаем полученные поля
+    return fields
+
+
+# # Пример использования
+# current_dir = os.path.dirname(__file__)
+# # Укажите путь к вашему шаблону
+# fields = process_docx(current_dir, 'raw_template.docx')
+# print(fields)
