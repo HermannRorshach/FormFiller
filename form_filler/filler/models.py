@@ -8,8 +8,10 @@ class IranPassport(models.Model):
         ("F", "женский"),
     ]
     ISSUING_AUTHORITY_CHOICES = [
-        ("authority1", "Бригадный генерал\nАли Золгадри"),
-        ("authority2", "Бригадный генерал\nСадэг Резадуст"),
+        ("authority1", "Полковник\nОмид Нодехи"),
+        ("authority2", "Бригадный генерал\nАли Золгадри"),
+        ("authority3", "Бригадный генерал\nСадэг Резадуст"),
+        ("authority4", "Бригадный генерал\nМохаммад Бабаэи"),
     ]
     SIGNATURE_CHOICES = [
         ("empty", "-"),
@@ -44,7 +46,7 @@ class IranPassport(models.Model):
     )
 
     def __str__(self):
-        return f"Иран пасп. {self.surname} {self.name}"
+        return f"Иран пасп. {self.surname.upper()} {self.name.upper()}"
 
 
 class Template(models.Model):

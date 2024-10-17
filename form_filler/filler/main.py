@@ -143,8 +143,10 @@ def main(cleaned_data, image_path=None):
         if field_name == 'sex':
             answer = {'M': 'мужской', 'F': 'женский'}[answer]
         if field_name == 'issuing_authority':
-            answer = {"authority1": "Бригадный генерал\nАли Золгадри",
-                      "authority2": "Бригадный генерал\nСадэг Резадуст"}[answer]
+            answer = {"authority1": "Полковник\nОмид Нодехи",
+                      "authority2": "Бригадный генерал\nАли Золгадри",
+                      "authority3": "Бригадный генерал\nСадэг Резадуст",
+                      "authority4": "Бригадный генерал\nМохаммад Бабаэи"}[answer]
         if field_name == 'signature':
             answer = {"empty": "-",
                       "signature": "/подпись/"}[answer]
