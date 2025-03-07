@@ -23,14 +23,14 @@ class IranPassport(models.Model):
     surname = models.CharField(max_length=30, verbose_name='Фамилия')
     name = models.CharField(max_length=30, verbose_name='Имя')
     father_name = models.CharField(max_length=30, verbose_name='Имя отца')
-    birthday = models.CharField(max_length=30, verbose_name='Дата рождения')
+    birthday = models.CharField(max_length=8, verbose_name='Дата рождения')
     place_of_birthday = models.CharField(
         max_length=30, verbose_name='Место рождения')
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, default='M', verbose_name='Пол')
-    date_of_issue = models.CharField(max_length=30, verbose_name='Дата выдачи')
+    date_of_issue = models.CharField(max_length=8, verbose_name='Дата выдачи')
     date_of_expiry = models.CharField(
-        max_length=30, verbose_name='Действителен до')
-    lond_number = models.CharField(max_length=30, verbose_name='Длинный номер')
+        max_length=8, verbose_name='Действителен до')
+    lond_number = models.CharField(max_length=27, verbose_name='Длинный номер')
     issuing_authority = models.CharField(
         max_length=10, choices=ISSUING_AUTHORITY_CHOICES,
         default='authority1',

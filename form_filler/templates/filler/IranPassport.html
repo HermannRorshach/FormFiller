@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Иранский паспорт{% endblock title %}
 
@@ -12,4 +13,5 @@
     </div>
     <br><button>Отправить</button>
 </form>
+<script src="{% static 'js/script.js' %}"></script>
 {% endblock content %}
